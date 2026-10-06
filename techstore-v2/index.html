@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TechStore Pro: catálogo de tecnología con carrito de compras accesible y persistente.">
+    <title>Catálogo - TechStore Pro</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
+
+    <header class="header">
+        <div class="header-container">
+            <a class="logo" href="index.html" aria-label="TechStore Pro, ir al inicio">
+                <span class="logo-marca" aria-hidden="true">⚡</span> TechStore <span class="logo-pro">Pro</span>
+            </a>
+            <nav aria-label="Principal">
+                <ul>
+                    <li><a href="index.html" class="nav-link" aria-current="page">Catálogo</a></li>
+                    <li>
+                        <a href="carrito.html" class="btn-carrito" id="enlace-carrito" aria-label="Carrito, 0 productos">
+                            <span aria-hidden="true">🛒</span> Carrito <span class="badge" id="cart-count" aria-hidden="true">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="contenido" class="contenedor">
+        <section class="hero" aria-labelledby="titulo-pagina">
+            <p class="eyebrow">TechStore Pro</p>
+            <h1 id="titulo-pagina" tabindex="-1">Tecnología que potencia tu día</h1>
+            <p class="hero-texto">Audio, periféricos, pantallas, laptops y más. Elige tus productos y arma tu carrito en segundos.</p>
+            <p id="ultima-visita" class="hero-nota"></p>
+        </section>
+
+        <section aria-labelledby="t-catalogo">
+            <h2 id="t-catalogo">Catálogo de productos</h2>
+
+            <div class="herramientas">
+                <div class="buscador">
+                    <label for="buscador">Buscar producto</label>
+                    <input id="buscador" type="search" placeholder="Ej. teclado, monitor, parlante..." autocomplete="off">
+                </div>
+                <div id="filtros" class="filtros" role="group" aria-label="Filtrar por categoría"></div>
+            </div>
+
+            <p id="resumen" class="nota" role="status"></p>
+
+            <div id="grid-productos" class="grid-productos"></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 TechStore Pro - Proyecto de Desarrollo en Plataformas.</p>
+    </footer>
+
+    <div id="toast" class="toast" role="status"></div>
+
+    <script src="data/productos.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/catalogo.js"></script>
+</body>
+</html>

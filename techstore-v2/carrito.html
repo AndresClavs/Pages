@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Revisa tu carrito y finaliza tu compra en TechStore Pro.">
+    <title>Carrito y compra - TechStore Pro</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+    <a class="skip-link" href="#contenido">Saltar al contenido principal</a>
+
+    <header class="header">
+        <div class="header-container">
+            <a class="logo" href="index.html" aria-label="TechStore Pro, ir al inicio">
+                <span class="logo-marca" aria-hidden="true">⚡</span> TechStore <span class="logo-pro">Pro</span>
+            </a>
+            <nav aria-label="Principal">
+                <ul>
+                    <li><a href="index.html" class="nav-link">Catálogo</a></li>
+                    <li>
+                        <a href="carrito.html" class="btn-carrito" id="enlace-carrito" aria-current="page" aria-label="Carrito, 0 productos">
+                            <span aria-hidden="true">🛒</span> Carrito <span class="badge" id="cart-count" aria-hidden="true">0</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="contenido" class="contenedor">
+        <h1 id="titulo-pagina" class="titulo-pagina" tabindex="-1">Tu carrito</h1>
+        <p class="nota"><a class="enlace" href="index.html">← Seguir comprando</a></p>
+
+        <!-- Vista: carrito vacío -->
+        <section id="vista-vacia" class="vacio" aria-labelledby="t-vacio" hidden>
+            <p class="vacio-icono" aria-hidden="true">🛒</p>
+            <h2 id="t-vacio">Tu carrito está vacío</h2>
+            <p>Agrega productos desde el catálogo para continuar con tu compra.</p>
+            <a class="btn-primary btn-inline" href="index.html">Ir al catálogo</a>
+            <p id="ultimo-pedido" class="nota" hidden></p>
+        </section>
+
+        <!-- Vista: carrito con productos -->
+        <div id="vista-carrito" class="checkout-layout" hidden>
+            <section class="panel" aria-labelledby="t-productos">
+                <div class="panel-cabecera">
+                    <h2 id="t-productos">Productos</h2>
+                    <button type="button" id="btn-vaciar" class="btn-link">Vaciar carrito</button>
+                </div>
+                <ul id="lista-carrito" class="lista-carrito"></ul>
+            </section>
+
+            <div class="columna-lateral">
+                <section class="panel" aria-labelledby="t-resumen">
+                    <h2 id="t-resumen">Resumen del pedido</h2>
+                    <dl class="totales">
+                        <div class="fila"><dt>Unidades</dt><dd id="unidades">0</dd></div>
+                        <div class="fila"><dt>Subtotal</dt><dd id="subtotal">$0.00</dd></div>
+                        <div class="fila"><dt>IVA (15%)</dt><dd id="iva">$0.00</dd></div>
+                        <div class="fila total"><dt>Total</dt><dd id="total">$0.00</dd></div>
+                    </dl>
+                    <p class="nota">Última actualización: <time id="ultima-actualizacion">—</time></p>
+                </section>
+
+                <section class="panel" aria-labelledby="t-checkout">
+                    <h2 id="t-checkout">Datos de contacto</h2>
+                    <form id="form-checkout" novalidate>
+                        <div class="campo">
+                            <label for="nombre">Nombre completo</label>
+                            <input id="nombre" type="text" maxlength="60" autocomplete="name" required aria-required="true" aria-describedby="ayuda-nombre err-nombre">
+                            <small id="ayuda-nombre" class="ayuda">Nombre y apellido, solo letras.</small>
+                            <span id="err-nombre" class="error-msg" role="alert" hidden></span>
+                        </div>
+
+                        <div class="campo">
+                            <label for="email">Correo electrónico</label>
+                            <input id="email" type="email" maxlength="80" autocomplete="email" required aria-required="true" aria-describedby="ayuda-email err-email">
+                            <small id="ayuda-email" class="ayuda">Ej. usuario@dominio.com</small>
+                            <span id="err-email" class="error-msg" role="alert" hidden></span>
+                        </div>
+
+                        <div class="campo">
+                            <label for="telefono">Teléfono</label>
+                            <input id="telefono" type="tel" maxlength="20" autocomplete="tel" inputmode="tel" required aria-required="true" aria-describedby="ayuda-telefono err-telefono">
+                            <small id="ayuda-telefono" class="ayuda">De 7 a 15 dígitos, puede iniciar con +.</small>
+                            <span id="err-telefono" class="error-msg" role="alert" hidden></span>
+                        </div>
+
+                        <button type="submit" class="btn-primary">Finalizar compra</button>
+                    </form>
+                    <p id="mensaje" class="mensaje" role="status"></p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 TechStore Pro - Proyecto de Desarrollo en Plataformas.</p>
+    </footer>
+
+    <!-- Popup: compra exitosa -->
+    <dialog id="dialogo-exito" class="dialogo" aria-labelledby="t-exito" aria-describedby="d-exito">
+        <div class="dialogo-icono exito" aria-hidden="true">✓</div>
+        <h2 id="t-exito">¡Compra realizada!</h2>
+        <p id="d-exito"></p>
+        <dl id="resumen-pedido" class="resumen-pedido"></dl>
+        <form method="dialog" class="dialogo-acciones">
+            <a class="btn-secundario" href="index.html">Seguir comprando</a>
+            <button type="submit" class="btn-primary btn-inline" value="cerrar" autofocus>Cerrar</button>
+        </form>
+    </dialog>
+
+    <!-- Popup: confirmar vaciar carrito -->
+    <dialog id="dialogo-vaciar" class="dialogo" aria-labelledby="t-vaciar" aria-describedby="d-vaciar">
+        <div class="dialogo-icono alerta" aria-hidden="true">!</div>
+        <h2 id="t-vaciar">¿Vaciar el carrito?</h2>
+        <p id="d-vaciar">Se quitarán todos los productos. Esta acción no se puede deshacer.</p>
+        <form method="dialog" class="dialogo-acciones">
+            <button type="submit" class="btn-secundario" value="cancelar" autofocus>Cancelar</button>
+            <button type="submit" class="btn-peligro" value="confirmar">Sí, vaciar</button>
+        </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status"></div>
+    <div id="anuncios" class="sr-only" aria-live="polite"></div>
+
+    <script src="data/productos.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/checkout.js"></script>
+</body>
+</html>
