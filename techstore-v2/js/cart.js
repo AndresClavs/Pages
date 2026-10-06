@@ -23,7 +23,8 @@ const Cart = (() => {
         }
     }
 
-    let items = leer();
+    let items = [];
+    let inicializado = false;
 
     function guardar() {
         try {
@@ -36,6 +37,11 @@ const Cart = (() => {
 
     return {
         IVA,
+        inicializar() {
+            if (inicializado) return;
+            items = leer();
+            inicializado = true;
+        },
         cantidadDe(id) {
             const item = items.find((i) => i.id === id);
             return item ? item.cantidad : 0;

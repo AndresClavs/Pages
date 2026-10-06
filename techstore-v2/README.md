@@ -1,23 +1,18 @@
 # TechStore Pro - Carrito de compras (2 páginas)
 
-Tienda en línea de tecnología con **catálogo** (`index.html`) y **carrito + compra** (`carrito.html`), hecha con HTML5 semántico, CSS3 responsive y JavaScript ES6+ puro. No usa `fetch`, módulos ni librerías.
+Tienda en línea de tecnología con **catálogo** (`index.html`) y **carrito + compra** (`carrito.html`), hecha con HTML5 semántico, CSS3 responsive y JavaScript ES6+ puro. Los productos se cargan desde `data/productos.json` mediante `fetch`; no usa módulos ni librerías externas.
 
 **Demo web:** [TechStore Pro en GitHub Pages](https://andresclavs.github.io/Pages/techstore-v2/)
 
 ## Cómo abrirlo con la terminal
 
-Desde la carpeta del proyecto:
-
-- Windows: `start index.html`
-- macOS: `open index.html`
-- Linux: `xdg-open index.html`
-
-Opcional (recomendado, las cookies funcionan en Chrome solo con servidor):
+Como el catálogo se carga desde un archivo JSON, abre el proyecto con un servidor local (no directamente con `file://`). Desde la carpeta del proyecto:
 
 ```
 python -m http.server 8000
 ```
-y abrir http://localhost:8000
+
+Luego abre http://localhost:8000.
 
 ## Estructura de carpetas
 
@@ -30,7 +25,8 @@ techstore-v2/
 │   ├── styles.css       # Estilos responsive (Grid + Flexbox)
 │   └── img/placeholder.svg
 ├── data/
-│   └── productos.js     # Catálogo (9 productos) como arreglo JS
+│   ├── productos.json   # Catálogo (9 productos) en formato JSON
+│   └── productos.js     # Carga y valida el catálogo JSON
 └── js/
     ├── cart.js          # Modelo del carrito + persistencia (localStorage, sessionStorage, cookies)
     ├── ui.js            # Utilidades compartidas: formato, toast, contador
@@ -40,7 +36,7 @@ techstore-v2/
 
 ## Explicación técnica
 
-- **Catálogo:** los productos están en `data/productos.js`. Cada uno se dibuja con `tarjetaHTML()` (tarjeta reutilizable con imagen, categoría, descripción, precio y botón). Incluye búsqueda por texto y filtro por categoría.
+- **Catálogo:** los productos están en `data/productos.json`. Para agregar uno, añade un objeto con `id` único (entero positivo), `nombre`, `categoria`, `descripcion`, `precio` (número) e `imagen` (URL) al arreglo. El cargador valida los datos antes de mostrarlos. Cada producto se dibuja con `tarjetaHTML()` (tarjeta reutilizable con imagen, categoría, descripción, precio y botón). Incluye búsqueda por texto y filtro por categoría.
 - **Carrito:** añadir (catálogo), aumentar/disminuir cantidad (1 a 99), eliminar y vaciar (carrito). Subtotal, IVA (15%) y total se calculan en centavos para evitar errores de decimales. Las dos páginas comparten el mismo carrito.
 - **Popups:** se usan elementos nativos `<dialog>` con `showModal()`: confirmación de "Vaciar carrito" y resumen de "Compra realizada". Un mensaje flotante (toast) avisa al añadir o eliminar productos.
 - **Validaciones (regex):** nombre y apellido, correo y teléfono. Se validan al salir del campo, al escribir (una vez tocado) y al enviar.

@@ -208,4 +208,11 @@ $('form-checkout').addEventListener('submit', (e) => {
 });
 
 // ===== Inicio =====
-renderizar();
+PRODUCTOS_LISTOS.then(() => {
+    Cart.inicializar();
+    renderizar();
+}).catch((error) => {
+    console.error('No se pudo iniciar el carrito.', error);
+    $('error-carga').textContent = `No se pudo cargar el catálogo. ${error.message}`;
+    $('error-carga').hidden = false;
+});

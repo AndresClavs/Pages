@@ -83,10 +83,17 @@ $('grid-productos').addEventListener('click', (e) => {
 });
 
 // ----- Inicio -----
-const visitaAnterior = Visita.registrar(); // Cookie
-$('ultima-visita').textContent = visitaAnterior
-    ? 'Tu última visita fue el ' + formatearFecha(visitaAnterior) + '.'
-    : '¡Bienvenido! Esta es tu primera visita.';
-crearFiltros();
-renderizarCatalogo();
-actualizarContador();
+PRODUCTOS_LISTOS.then(() => {
+    Cart.inicializar();
+    const visitaAnterior = Visita.registrar(); // Cookie
+    $('ultima-visita').textContent = visitaAnterior
+        ? 'Tu última visita fue el ' + formatearFecha(visitaAnterior) + '.'
+        : '¡Bienvenido! Esta es tu primera visita.';
+    crearFiltros();
+    renderizarCatalogo();
+    actualizarContador();
+}).catch((error) => {
+    console.error('No se pudo iniciar el catálogo.', error);
+    $('error-carga').textContent = `No se pudo cargar el catálogo. ${error.message}`;
+    $('error-carga').hidden = false;
+});
