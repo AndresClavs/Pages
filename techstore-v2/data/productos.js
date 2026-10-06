@@ -29,7 +29,7 @@ function validarProductos(productos) {
     });
 }
 
-const PRODUCTOS_LISTOS = fetch('data/productos.json')
+const PRODUCTOS_LISTOS = fetch('data/productos.json?v=20261006-1')
     .then((respuesta) => {
         if (!respuesta.ok) {
             throw new Error(`No se pudo cargar data/productos.json (HTTP ${respuesta.status}).`);
