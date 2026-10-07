@@ -43,7 +43,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const money = n => '$' + n.toFixed(2);
 const prod = id => PRODUCTOS.find(p => p.id === +id);
-const emailValido = valor => {
+window.emailValido = valor => {
   const email = valor.trim();
   const partes = email.split('@');
   if (partes.length !== 2) return false;
@@ -353,7 +353,7 @@ const Registro = (() => {
     nombre: v => !v.trim() ? 'Escribe tu nombre'
       : !/^[\p{L}][\p{L}\s'’-]*$/u.test(v.trim()) ? 'Usa solo letras en tu nombre, sin números ni símbolos'
       : v.trim().length < 2 ? 'Escribe al menos 2 letras' : '',
-    email: v => !v.trim() ? 'Escribe tu correo electrónico' : emailValido(v) ? '' : 'Escribe un correo válido con un nombre y dominio correctos, por ejemplo nombre@correo.com',
+    email: v => !v.trim() ? 'Escribe tu correo electrónico' : window.emailValido(v) ? '' : 'Escribe un correo válido con un nombre y dominio correctos, por ejemplo nombre@correo.com',
     clave: v => !v ? 'Crea una contraseña' : v.length < 6 ? 'La contraseña debe tener al menos 6 caracteres' : v.length > 128 ? 'La contraseña no puede superar 128 caracteres' : ''
   };
   const CAMPOS = [['nombre', 'Nombre', 'text', 'name', ''], ['email', 'Correo electrónico', 'email', 'email', 'Ejemplo: nombre@correo.com'], ['clave', 'Contraseña', 'password', 'new-password', 'Entre 6 y 128 caracteres']];

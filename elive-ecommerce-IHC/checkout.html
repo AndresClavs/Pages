@@ -182,7 +182,7 @@
       nombre:   v => letras(v, 'tu nombre'),
       apellido: v => letras(v, 'tu apellido'),
       email: v => !v.trim() ? 'Escribe tu correo electrónico'
-        : !emailValido(v) ? 'Escribe un correo válido con un nombre y dominio correctos, por ejemplo nombre@correo.com' : '',
+        : !window.emailValido(v) ? 'Escribe un correo válido con un nombre y dominio correctos, por ejemplo nombre@correo.com' : '',
       direccion: v => {
         const direccion = v.trim();
         if (!direccion) return 'Escribe tu dirección de entrega (calle, número y ciudad)';
