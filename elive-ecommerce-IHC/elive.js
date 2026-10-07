@@ -43,6 +43,20 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const money = n => '$' + n.toFixed(2);
 const prod = id => PRODUCTOS.find(p => p.id === +id);
+const emailValido = valor => {
+  const email = valor.trim();
+  const partes = email.split('@');
+  if (partes.length !== 2) return false;
+  const [local, dominio] = partes;
+  const etiquetas = dominio.split('.');
+  return email.length <= 254
+    && local.length <= 64
+    && /[A-Za-z]/.test(local)
+    && /^[A-Za-z0-9_%+-]+(?:\.[A-Za-z0-9_%+-]+)*$/.test(local)
+    && etiquetas.length >= 2
+    && etiquetas.every(e => e.length >= 1 && e.length <= 63 && /^[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/.test(e))
+    && /^[A-Za-z]{2,63}$/.test(etiquetas[etiquetas.length - 1]);
+};
 // Cada prenda usa su propia imagen de Unsplash en catálogo, ficha y compra.
 const foto = (id, n, w = 600, h = 750) => {
   const p = prod(id);
@@ -339,10 +353,10 @@ const Registro = (() => {
     nombre: v => !v.trim() ? 'Escribe tu nombre'
       : !/^[\p{L}][\p{L}\s'’-]*$/u.test(v.trim()) ? 'Usa solo letras en tu nombre, sin números ni símbolos'
       : v.trim().length < 2 ? 'Escribe al menos 2 letras' : '',
-    email: v => !v.trim() ? 'Escribe tu correo electrónico' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? '' : 'Escribe un correo válido, por ejemplo nombre@correo.com',
-    clave: v => !v ? 'Crea una contraseña' : v.length < 6 ? 'La contraseña debe tener al menos 6 caracteres' : ''
+    email: v => !v.trim() ? 'Escribe tu correo electrónico' : emailValido(v) ? '' : 'Escribe un correo válido con un nombre y dominio correctos, por ejemplo nombre@correo.com',
+    clave: v => !v ? 'Crea una contraseña' : v.length < 6 ? 'La contraseña debe tener al menos 6 caracteres' : v.length > 128 ? 'La contraseña no puede superar 128 caracteres' : ''
   };
-  const CAMPOS = [['nombre', 'Nombre', 'text', 'name', ''], ['email', 'Correo electrónico', 'email', 'email', 'Ejemplo: nombre@correo.com'], ['clave', 'Contraseña', 'password', 'new-password', 'Mínimo 6 caracteres']];
+  const CAMPOS = [['nombre', 'Nombre', 'text', 'name', ''], ['email', 'Correo electrónico', 'email', 'email', 'Ejemplo: nombre@correo.com'], ['clave', 'Contraseña', 'password', 'new-password', 'Entre 6 y 128 caracteres']];
   let m = null, previo = null;
   const el = id => document.getElementById('r-' + id);
 
@@ -387,7 +401,7 @@ const Registro = (() => {
         ${CAMPOS.map(([id, et, tipo, ac, ay]) => `
         <div>
           <label for="r-${id}" class="mb-1 block text-sm font-medium">${et}</label>
-          <div class="relative"><input id="r-${id}" type="${tipo}" autocomplete="${ac}" required aria-describedby="r-ay-${id} r-er-${id}" class="${BASE}border border-black">${OKI(id)}</div>
+          <div class="relative"><input id="r-${id}" type="${tipo}" autocomplete="${ac}" maxlength="${id === 'email' ? 254 : id === 'clave' ? 128 : 60}" required aria-describedby="r-ay-${id} r-er-${id}" class="${BASE}border border-black">${OKI(id)}</div>
           <p id="r-ay-${id}" class="mt-1 text-xs ${ay ? '' : 'hidden'}">${ay}</p>
           <p id="r-er-${id}" class="mt-1 hidden items-center gap-2 text-sm font-medium text-red-600"></p>
         </div>`).join('')}
