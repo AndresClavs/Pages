@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estado de tu pedido | ELIVE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F9F9F6] text-black font-sans antialiased">
+
+  <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:border focus:border-black focus:bg-white focus:px-4 focus:py-2">Saltar al contenido</a>
+
+  <header id="site-header"></header>
+
+  <main id="contenido" class="mx-auto max-w-3xl px-4 py-8 lg:py-12">
+
+    <section id="ok" class="hidden" aria-labelledby="h1">
+      <h1 id="h1" tabindex="-1" class="text-3xl font-semibold uppercase tracking-tight lg:text-4xl">Estado de tu pedido</h1>
+      <p class="mt-3">Pedido <strong id="num"></strong></p>
+      <p id="actual" role="status" class="mt-2 flex items-center gap-2 font-medium"></p>
+      <p class="mt-1 text-sm">Entrega estimada: 3 a 5 días hábiles.</p>
+
+      <ol id="linea" class="mt-8 space-y-0" aria-label="Seguimiento del pedido"></ol>
+
+      <div class="mt-6">
+        <button type="button" id="sim" class="border border-black bg-white px-6 py-3 text-sm font-medium transition-colors hover:bg-black hover:text-white">Simular el siguiente estado</button>
+      </div>
+
+      <div class="mt-10 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+        <h2 class="text-lg font-semibold uppercase tracking-wide">Resumen</h2>
+        <ul id="items" class="mt-4 divide-y divide-black/10"></ul>
+        <dl class="mt-4 space-y-2 border-t border-black/10 pt-4 text-sm">
+          <div class="flex justify-between"><dt>Subtotal</dt><dd id="r-sub"></dd></div>
+          <div class="flex justify-between"><dt>Envío</dt><dd id="r-env"></dd></div>
+          <div class="flex justify-between text-base font-bold"><dt>Total pagado</dt><dd id="r-tot"></dd></div>
+        </dl>
+      </div>
+      <a href="index.html#catalogo" class="mt-8 inline-block text-sm underline underline-offset-4">Seguir comprando</a>
+    </section>
+
+    <section id="nada" class="hidden bg-white p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+      <h1 class="text-2xl font-semibold">Aún no tienes pedidos</h1>
+      <p class="mt-2">Cuando completes una compra, podrás ver aquí cómo va tu pedido.</p>
+      <a href="index.html#catalogo" class="mt-6 inline-block border border-black bg-white px-8 py-3 text-sm tracking-wide transition-colors hover:bg-black hover:text-white">Ver catálogo</a>
+    </section>
+  </main>
+
+  <footer></footer>
+
+  <script src="elive.js"></script>
+  <script>
+    mountHeader();
+    const ped = Store.get('pedido', null);
+    const PASOS = [
+      ['Pedido recibido', 'Registramos tu compra.'],
+      ['Pago confirmado', 'Tu pago fue aprobado.'],
+      ['Preparando tu pedido', 'Estamos empacando tus prendas.'],
+      ['En camino', 'Tu pedido salió hacia tu dirección.'],
+      ['Entregado', 'Tu pedido llegó. ¡Gracias por comprar en ELIVE!']
+    ];
+    const CHK = '<svg class="h-7 w-7" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#15803D"/><path d="m7 12.5 3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const hora = iso => new Date(iso).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' });
+
+    function pintar() {
+      const e = ped.estado, act = e < 4 ? e + 1 : -1; // paso en curso
+      $('#linea').innerHTML = PASOS.map(([t, d], i) => {
+        const hecho = i <= e, curso = i === act;
+        const icono = hecho ? CHK
+          : curso ? '<span class="block h-7 w-7 rounded-full border-[6px] border-black bg-white" aria-hidden="true"></span>'
+          : '<span class="block h-7 w-7 rounded-full border-2 border-black/40 bg-white" aria-hidden="true"></span>';
+        const estado = hecho ? 'Completado' : curso ? 'En curso' : 'Pendiente';
+        return `<li ${curso ? 'aria-current="step"' : ''} class="flex gap-4">
+          <div class="flex flex-col items-center">${icono}${i < PASOS.length - 1 ? `<span class="my-1 w-0.5 flex-1 ${i < e ? 'bg-green-700' : 'bg-black/20'}" aria-hidden="true"></span>` : ''}</div>
+          <div class="pb-6">
+            <p class="font-semibold ${hecho ? 'text-green-700' : ''}">${t} <span class="ml-1 text-xs font-medium text-black">(${estado})</span></p>
+            <p class="text-sm">${d}</p>
+            ${hecho && ped.fechas[i] ? `<p class="text-xs text-black/70">${hora(ped.fechas[i])}</p>` : ''}
+          </div></li>`;
+      }).join('');
+      $('#actual').innerHTML = e === 4
+        ? `${CHK}<span class="text-green-700">Estado actual: Entregado</span>`
+        : `<span>Estado actual: ${PASOS[act][0]}</span>`;
+      $('#sim').classList.toggle('hidden', e >= 4);
+    }
+
+    if (!ped) {
+      $('#nada').classList.remove('hidden');
+    } else {
+      $('#ok').classList.remove('hidden');
+      $('#num').textContent = ped.num;
+      $('#items').innerHTML = ped.items.map(i => `
+        <li class="flex items-center justify-between gap-4 py-3 text-sm">
+          <span>${i.nombre} · Talla ${i.talla} · Cantidad ${i.cant}</span>
+          <span class="font-semibold">${money(i.sub)}</span></li>`).join('');
+      $('#r-sub').textContent = money(ped.subtotal);
+      $('#r-env').textContent = ped.envio === 0 ? 'Gratis' : money(ped.envio);
+      $('#r-tot').textContent = money(ped.total);
+      pintar();
+      $('#sim').addEventListener('click', () => {
+        if (ped.estado >= 4) return;
+        ped.estado++;
+        ped.fechas[ped.estado] = new Date().toISOString();
+        Store.set('pedido', ped);
+        pintar();
+        Aviso(`Tu pedido ahora está: ${PASOS[ped.estado][0]}`);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datos y pago | ELIVE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F9F9F6] text-black font-sans antialiased">
+
+  <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:border focus:border-black focus:bg-white focus:px-4 focus:py-2">Saltar al contenido</a>
+
+  <header class="border-b border-black/10 bg-[#F9F9F6]">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 lg:px-8">
+      <a href="index.html" class="text-2xl font-medium uppercase tracking-[0.35em] [font-family:Jost,'Helvetica_Neue',Arial,sans-serif]" aria-label="Elive, ir al inicio">ELIVE</a>
+      <p class="flex items-center gap-2 text-sm tracking-wide">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <span>Pago seguro</span>
+      </p>
+    </div>
+  </header>
+
+  <main id="contenido" class="mx-auto max-w-7xl px-4 py-8 lg:px-8 lg:py-12">
+
+    <nav aria-label="Progreso de la compra" class="mb-6">
+      <ol class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <li><a href="carrito.html" class="underline underline-offset-4">1. Bolsa</a></li>
+        <li aria-hidden="true">›</li>
+        <li aria-current="step" class="font-semibold underline underline-offset-4">2. Datos y pago <span class="sr-only">(paso actual)</span></li>
+        <li aria-hidden="true">›</li>
+        <li>3. Confirmación</li>
+      </ol>
+    </nav>
+
+    <h1 class="mb-2 text-3xl font-semibold uppercase tracking-tight lg:text-4xl">Datos y pago</h1>
+    <p class="mb-8 text-sm">Todos los campos son obligatorios. <a href="carrito.html" class="underline underline-offset-4">‹ Volver a la bolsa</a></p>
+
+    <p id="progreso" class="mb-8 flex items-center gap-2 text-sm font-medium" aria-live="polite"></p>
+
+    <form id="form-checkout" novalidate class="grid grid-cols-1 gap-10 lg:grid-cols-3 lg:gap-12">
+
+      <div class="space-y-10 lg:col-span-2">
+        <div id="secciones" class="space-y-10"></div>
+
+        <details class="max-w-md border-y border-black/10 py-3">
+          <summary class="cursor-pointer text-sm font-medium">¿Dónde encuentro el CVV?</summary>
+          <p class="mt-2 text-sm">Son los 3 dígitos al reverso de tu tarjeta, junto a la firma. En algunas tarjetas son 4 dígitos al frente.</p>
+        </details>
+
+        <div>
+          <p id="errores-resumen" role="alert" class="mb-3 hidden text-sm font-medium text-red-600"></p>
+          <button type="submit" id="btn-finalizar" class="w-full bg-black px-4 py-4 text-base font-medium tracking-wide text-white transition-colors hover:bg-black/85">Finalizar pedido</button>
+          <p id="estado" role="status" class="mt-3 text-sm"></p>
+          <p id="aviso-vacio" role="alert" class="mt-3 hidden text-sm font-medium text-red-600">Tu bolsa está vacía. <a href="index.html#catalogo" class="underline underline-offset-4">Añade una prenda para continuar</a>.</p>
+        </div>
+      </div>
+
+      <!-- TU PEDIDO -->
+      <aside aria-labelledby="pedido-titulo" class="h-fit bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+        <h2 id="pedido-titulo" class="text-lg font-semibold uppercase tracking-wide">Tu pedido</h2>
+        <ul id="items" class="mt-6 space-y-4 border-b border-black/10 pb-6"></ul>
+        <dl class="mt-6 space-y-3 text-sm">
+          <div class="flex justify-between"><dt>Subtotal</dt><dd id="r-subtotal"></dd></div>
+          <div class="flex justify-between"><dt>Envío</dt><dd id="r-envio"></dd></div>
+        </dl>
+        <div id="caja-registro" class="mt-4"></div>
+        <div class="mt-4 flex items-baseline justify-between border-t border-black/10 pt-4">
+          <p class="font-bold">Total a pagar</p>
+          <p id="r-total" class="text-3xl font-bold"></p>
+        </div>
+      </aside>
+    </form>
+  </main>
+
+  <footer></footer>
+
+  <script src="elive.js"></script>
+  <script>
+    const form = $('#form-checkout'), btn = $('#btn-finalizar');
+    const ALERTA = '<svg class="h-5 w-5 flex-none" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 2.5 20h19L12 4Z"/><path d="M12 10v4M12 17v.5"/></svg>';
+    const OKI = '<svg class="pointer-events-none absolute right-3 top-1/2 hidden h-5 w-5 -translate-y-1/2" fill="none" stroke="#15803D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+
+    /* ----- Campos: [id, etiqueta, type, autocomplete, ayuda, inputmode, maxlength, ancho completo] ----- */
+    const SECC = [
+      ['1. Contacto y datos personales', [
+        ['nombre', 'Nombre', 'text', 'given-name'],
+        ['apellido', 'Apellido', 'text', 'family-name'],
+        ['email', 'Correo electrónico', 'email', 'email', 'Ejemplo: nombre@correo.com', '', '', 1]]],
+      ['2. Dirección de entrega', [
+        ['direccion', 'Dirección (calle, número, ciudad)', 'text', 'street-address', '', '', '', 1],
+        ['telefono', 'Teléfono de contacto', 'tel', 'tel', 'Mínimo 7 dígitos', 'tel', '', 1]]],
+      ['3. Método de pago', [
+        ['tarjeta', 'Número de tarjeta', 'text', 'cc-number', 'Visa, Mastercard, Amex o Discover. Para probar: 4242 4242 4242 4242', 'numeric', 19, 1],
+        ['fecha', 'Fecha de expiración (MM/AA)', 'text', 'cc-exp', 'Ejemplo: 08/28', 'numeric', 5],
+        ['cvv', 'Código CVV', 'text', 'cc-csc', '3 dígitos (4 en American Express)', 'numeric', 4]]]
+    ];
+    $('#secciones').innerHTML = SECC.map(([t, cs], si) => `
+      <fieldset class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <legend class="mb-4 text-lg font-semibold uppercase tracking-wide">${t}${CHECK.replace('<svg class="h-5 w-5 flex-none"', `<svg id="secok-${si}" class="ml-2 hidden h-5 w-5 flex-none align-middle"`)}</legend>
+        ${cs.map(([id, et, tipo, ac, ayuda = '', im = '', ml = '', full]) => `
+        <div class="${full ? 'sm:col-span-2' : ''}">
+          <label for="${id}" class="mb-1 block text-sm font-medium">${et}</label>
+          <div class="relative">
+            <input type="${tipo}" id="${id}" name="${id}" autocomplete="${ac}" required aria-describedby="ayuda-${id} error-${id}" ${im ? `inputmode="${im}"` : ''} ${ml ? `maxlength="${ml}"` : ''} class="w-full border border-black bg-white px-4 py-3 pr-11">
+            ${OKI.replace('<svg ', `<svg id="ok-${id}" `)}
+          </div>
+          <p id="ayuda-${id}" class="mt-1 text-xs ${ayuda ? '' : 'hidden'}">${ayuda}</p>
+          <p id="error-${id}" class="mt-1 hidden items-center gap-2 text-sm font-medium text-red-600"></p>
+        </div>`).join('')}
+      </fieldset>`).join('');
+
+    const campos = {};
+    SECC.forEach(([, cs]) => cs.forEach(c => campos[c[0]] = $('#' + c[0])));
+    campos.tarjeta.classList.replace('pr-11', 'pr-28');
+    campos.tarjeta.insertAdjacentHTML('afterend', '<span id="marca" class="hidden" aria-live="polite"></span>');
+
+    /* ----- Resumen desde localStorage ----- */
+    function pintarPedido() {
+      const items = Cart.list(), vacia = !items.length;
+      $('#items').innerHTML = vacia ? '<li class="text-sm">Tu bolsa está vacía.</li>' : items.map(it => {
+        const p = prod(it.id);
+        return `<li class="flex items-center gap-4">
+          <img src="${foto(p.id, 1, 150, 200)}" alt="" width="75" height="100" class="h-24 w-[72px] object-cover">
+          <div class="flex-1"><p class="font-medium">${p.nombre}</p>
+            <p class="mt-1 text-sm">Talla: <span class="font-semibold">${it.talla}</span></p>
+            <p class="mt-1 text-sm">Cantidad: ${it.cant}</p></div>
+          <p class="font-semibold">${money(p.precio * it.cant)}</p></li>`;
+      }).join('');
+      $('#r-subtotal').textContent = money(Cart.subtotal());
+      $('#r-envio').innerHTML = vacia ? '—' : Cart.envio() === 0
+        ? `<span class="mr-2 text-black/60 line-through"><span class="sr-only">Antes: </span>${money(ENVIO)}</span><span class="font-semibold">Gratis</span>`
+        : money(ENVIO);
+      $('#r-total').textContent = money(Cart.total());
+      const reg = Store.get('registrado', false), u = Store.get('usuario', null);
+      $('#caja-registro').innerHTML = vacia ? '' : reg
+        ? `<p class="flex items-center gap-2 text-sm font-medium text-green-700">${CHECK}<span>Envío gratis por tu cuenta${u ? ', ' + escapa(u.nombre.split(' ')[0]) : ''}</span></p>`
+        : `<div class="border border-black p-3 text-sm"><p>El envío cuesta ${money(ENVIO)}. Si creas tu cuenta gratis, no pagas envío.</p><button type="button" data-registro class="mt-2 w-full border border-black bg-white px-4 py-2 font-medium transition-colors hover:bg-black hover:text-white">Crear cuenta gratis</button></div>`;
+      if (reg && u) precargar(u);
+      btn.setAttribute('aria-disabled', vacia);
+      btn.classList.toggle('bg-black', !vacia);
+      btn.classList.toggle('hover:bg-black/85', !vacia);
+      btn.classList.toggle('bg-black/30', vacia);
+      btn.classList.toggle('cursor-not-allowed', vacia);
+      $('#aviso-vacio').classList.toggle('hidden', !vacia);
+    }
+
+    /* ----- Formato mientras escribe ----- */
+    campos.tarjeta.addEventListener('input', () => {
+      let d = campos.tarjeta.value.replace(/\D/g, '');
+      const mc = marca(d), amex = mc === 'Amex';
+      d = d.slice(0, amex ? 15 : 16);
+      campos.tarjeta.value = amex ? [d.slice(0, 4), d.slice(4, 10), d.slice(10)].filter(Boolean).join(' ') : d.replace(/(.{4})/g, '$1 ').trim();
+      const b = $('#marca');
+      b.className = 'pointer-events-none absolute right-10 top-1/2 -translate-y-1/2 rounded border border-black/30 bg-white px-2 py-0.5 text-xs font-bold ' + (mc ? (mc === 'Visa' ? 'text-blue-800' : mc === 'Amex' ? 'text-sky-700' : 'text-orange-700') : 'hidden');
+      b.innerHTML = mc ? mc.toUpperCase() + '<span class="sr-only"> tarjeta detectada</span>' : '';
+    });
+    campos.fecha.addEventListener('input', () => {
+      let d = campos.fecha.value.replace(/\D/g, '').slice(0, 4);
+      if (d.length >= 3) d = d.slice(0, 2) + '/' + d.slice(2);
+      campos.fecha.value = d;
+    });
+    campos.cvv.addEventListener('input', () => { campos.cvv.value = campos.cvv.value.replace(/\D/g, '').slice(0, 4); });
+    ['nombre', 'apellido'].forEach(n => campos[n].addEventListener('input', () => { campos[n].value = campos[n].value.replace(/[^\p{L}\s'’-]/gu, ''); }));
+    campos.telefono.addEventListener('input', () => { campos.telefono.value = campos.telefono.value.replace(/[^\d+\s-]/g, ''); });
+
+    /* ----- Reglas: devuelven el mensaje de error o '' ----- */
+    const letras = (v, q) => !v.trim() ? `Escribe ${q}` : !/^[\p{L}][\p{L}\s'’-]*$/u.test(v.trim()) ? 'Usa solo letras, sin números ni símbolos' : '';
+    // Marca de la tarjeta según sus primeros dígitos
+    const marca = d => /^4/.test(d) ? 'Visa' : /^(5[1-5]|2(2[2-9]|[3-6]\d|7[01]|720))/.test(d) ? 'Mastercard' : /^3[47]/.test(d) ? 'Amex' : /^(6011|65)/.test(d) ? 'Discover' : '';
+    // Algoritmo de Luhn: comprueba que el número de tarjeta sea coherente
+    const luhn = d => { let s = 0, alt = false; for (let i = d.length - 1; i >= 0; i--) { let n = +d[i]; if (alt) { n *= 2; if (n > 9) n -= 9; } s += n; alt = !alt; } return s % 10 === 0; };
+    const cvvLen = () => marca(campos.tarjeta.value.replace(/\D/g, '')) === 'Amex' ? 4 : 3;
+    const reglas = {
+      nombre:   v => letras(v, 'tu nombre'),
+      apellido: v => letras(v, 'tu apellido'),
+      email: v => !v.trim() ? 'Escribe tu correo electrónico'
+        : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) ? 'Escribe un correo válido, por ejemplo nombre@correo.com' : '',
+      direccion: v => v.trim() ? '' : 'Escribe tu dirección de entrega (calle, número y ciudad)',
+      telefono: v => !v.trim() ? 'Escribe tu teléfono de contacto'
+        : v.replace(/\D/g, '').length < 7 ? 'El teléfono debe tener al menos 7 dígitos' : '',
+      tarjeta: v => {
+        const d = v.replace(/\D/g, ''), n = marca(d) === 'Amex' ? 15 : 16;
+        return !d ? 'Escribe el número de tu tarjeta'
+          : !marca(d) ? 'Usa una tarjeta Visa, Mastercard, American Express o Discover'
+          : d.length < n ? 'El número de tarjeta está incompleto'
+          : !luhn(d) ? 'El número de tarjeta no es válido. Revísalo' : '';
+      },
+      fecha: v => {
+        if (!v.trim()) return 'Escribe la fecha de expiración';
+        const m = v.match(/^(\d{2})\/(\d{2})$/);
+        if (!m || +m[1] < 1 || +m[1] > 12) return 'Usa el formato MM/AA, por ejemplo 08/28';
+        const hoy = new Date();
+        return (2000 + +m[2]) * 12 + +m[1] < hoy.getFullYear() * 12 + hoy.getMonth() + 1 ? 'La tarjeta está vencida. Usa otra tarjeta' : '';
+      },
+      cvv: v => !v.trim() ? 'Escribe el código CVV' : v.length !== cvvLen() ? `El CVV debe tener ${cvvLen()} dígitos` : ''
+    };
+
+    function mostrarError(n, msg) {
+      const e = $('#error-' + n);
+      e.innerHTML = ALERTA + '<span>' + msg + '</span>';
+      e.classList.remove('hidden'); e.classList.add('flex');
+      $('#ok-' + n).classList.add('hidden');
+      campos[n].setAttribute('aria-invalid', 'true');
+      campos[n].classList.remove('border-black', 'border-green-700');
+      campos[n].classList.add('border-red-600', 'border-2');
+    }
+    function limpiarError(n, ok) {
+      const e = $('#error-' + n);
+      e.textContent = ''; e.classList.add('hidden'); e.classList.remove('flex');
+      $('#ok-' + n).classList.toggle('hidden', !ok);
+      campos[n].removeAttribute('aria-invalid');
+      campos[n].classList.remove('border-red-600', 'border-2', 'border-black', 'border-green-700');
+      campos[n].classList.add(...(ok ? ['border-green-700', 'border-2'] : ['border-black']));
+    }
+    // Devuelve true si el campo es válido y actualiza error/check
+    function validar(n) {
+      const msg = reglas[n](campos[n].value);
+      msg ? mostrarError(n, msg) : limpiarError(n, true);
+      progreso();
+      return !msg;
+    }
+    Object.keys(campos).forEach(n => {
+      // Al salir del campo: valida solo si el usuario escribió algo
+      campos[n].addEventListener('blur', () => { if (campos[n].value.trim()) validar(n); });
+      // Al corregir, el error desaparece en cuanto el valor es válido
+      campos[n].addEventListener('input', () => {
+        if (campos[n].getAttribute('aria-invalid') === 'true' && !reglas[n](campos[n].value)) limpiarError(n, true);
+        else {
+          $('#ok-' + n).classList.add('hidden');
+          if (campos[n].getAttribute('aria-invalid') !== 'true') { campos[n].classList.remove('border-green-700', 'border-2'); campos[n].classList.add('border-black'); }
+        }
+        progreso();
+      });
+    });
+
+    /* ----- Envío ----- */
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const res = $('#errores-resumen');
+      if (!Cart.count()) { $('#aviso-vacio').classList.remove('hidden'); return; }
+      const malos = Object.keys(campos).filter(n => !validar(n));
+      if (malos.length) {
+        res.textContent = `Revisa ${malos.length} ${malos.length === 1 ? 'campo marcado' : 'campos marcados'} antes de continuar.`;
+        res.classList.remove('hidden');
+        campos[malos[0]].focus();
+        return;
+      }
+      if (btn.dataset.enviando) return;
+      btn.dataset.enviando = '1';
+      res.classList.add('hidden');
+      btn.setAttribute('aria-disabled', 'true');
+      btn.textContent = 'Procesando tu pedido…';
+      $('#estado').textContent = 'Procesando tu pedido, no cierres esta página.';
+      setTimeout(() => {
+        Store.set('pedido', {
+          num: 'EL-' + Math.floor(100000 + Math.random() * 900000),
+          estado: 1, fechas: [new Date().toISOString(), new Date().toISOString()],
+          email: campos.email.value.trim(),
+          items: Cart.list().map(it => { const p = prod(it.id); return { nombre: p.nombre, talla: it.talla, cant: it.cant, sub: p.precio * it.cant }; }),
+          subtotal: Cart.subtotal(), envio: Cart.envio(), total: Cart.total()
+        });
+        Cart.clear();
+        location.href = 'confirmacion.html';
+      }, 800);
+    });
+
+    // Cuenta campos correctos: marca cada sección completa y avisa cuando todo está listo
+    function progreso() {
+      const ids = Object.keys(campos);
+      const ok = ids.filter(n => campos[n].value.trim() && !reglas[n](campos[n].value));
+      SECC.forEach(([, cs], i) => $('#secok-' + i).classList.toggle('hidden', !cs.every(c => ok.includes(c[0]))));
+      $('#progreso').innerHTML = ok.length === ids.length
+        ? `${CHECK}<span class="text-green-700">¡Todo listo! Ya puedes finalizar tu pedido.</span>`
+        : `<span>Campos completos: ${ok.length} de ${ids.length}</span>`;
+    }
+    // Si ya tiene cuenta, rellena nombre, apellido y correo
+    function precargar(u) {
+      [['nombre', u.nombre], ['apellido', u.apellido], ['email', u.email]].forEach(([n, v]) => {
+        if (v && !campos[n].value) { campos[n].value = v; validar(n); }
+      });
+    }
+
+    document.addEventListener('elive:change', pintarPedido);
+    progreso();
+    pintarPedido();
+  </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ELIVE | Ropa para toda la familia</title>
+  <meta name="description" content="Elive, tienda de ropa familiar: moda para mujer y hombre.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F9F9F6] text-black font-sans antialiased">
+
+  <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:border focus:border-black focus:bg-white focus:px-4 focus:py-2">Saltar al contenido</a>
+
+  <header id="site-header"></header>
+
+  <main id="contenido">
+    <!-- HERO -->
+    <section class="relative" aria-labelledby="hero-titulo">
+      <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&amp;fit=crop&amp;w=1600&amp;h=900&amp;q=85" alt="Interior de una tienda de ropa con prendas exhibidas"
+           class="h-[70vh] min-h-[420px] w-full object-cover" width="1600" height="900" fetchpriority="high">
+      <div class="absolute inset-0 flex items-end bg-gradient-to-t from-black/60 via-black/10 to-transparent">
+        <div class="mx-auto w-full max-w-7xl px-4 pb-10 lg:px-8 lg:pb-16">
+          <h1 id="hero-titulo" class="max-w-xl text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl">Ropa cómoda para toda la familia</h1>
+          <p class="mt-3 max-w-md text-lg text-white">Colección de temporada para mujer y hombre.</p>
+          <a href="#catalogo" class="mt-6 inline-block border border-black bg-white px-10 py-3 text-sm tracking-wide text-black transition-colors hover:bg-black hover:text-white">Ver colección</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATÁLOGO -->
+    <section id="catalogo" class="mx-auto max-w-7xl scroll-mt-20 px-4 py-12 lg:px-8 lg:py-16" aria-labelledby="catalogo-titulo">
+      <div class="mb-10 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 id="catalogo-titulo" class="text-2xl font-semibold tracking-tight sm:text-3xl"></h2>
+          <p id="conteo" class="mt-1 text-sm" aria-live="polite"></p>
+          <a id="ver-todo" href="index.html#catalogo" class="mt-2 hidden text-sm underline underline-offset-4">Ver todo el catálogo</a>
+        </div>
+        <div>
+          <label for="orden" class="mb-1 block text-sm">Ordenar por</label>
+          <select id="orden" class="border border-black bg-white px-3 py-2 text-sm">
+            <option value="">Novedades</option>
+            <option value="menor">Precio: de menor a mayor</option>
+            <option value="mayor">Precio: de mayor a menor</option>
+          </select>
+        </div>
+      </div>
+      <ul id="productos" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></ul>
+      <p id="sin-resultados" class="hidden py-12 text-center">No encontramos prendas con ese filtro. <a href="index.html#catalogo" class="underline underline-offset-4">Ver todo el catálogo</a></p>
+    </section>
+  </main>
+
+  <footer></footer>
+
+  <script src="elive.js"></script>
+  <script>
+    mountHeader();
+
+    // Filtros que llegan desde el menú: ?g=mujer&c=Vestidos&s=hombre&q=texto
+    const url = new URLSearchParams(location.search);
+    const g = url.get('g'), c = url.get('c'), s = url.get('s');
+    const qRaw = (url.get('q') || '').trim(), qq = qRaw.toLowerCase();
+    const NOMBRES = { mujer: 'Mujer', hombre: 'Hombre', nuevos: 'Nuevos', ofertas: 'Ofertas' };
+    const ORDEN = { menor: 'de menor a mayor precio', mayor: 'de mayor a menor precio' };
+
+    const base = PRODUCTOS.filter(p =>
+      (!g || (g === 'nuevos' ? p.nuevo : g === 'ofertas' ? p.antes : p.g === g)) &&
+      (!s || p.g === s) && (!c || p.c === c) &&
+      (!qq || (p.nombre + ' ' + p.c).toLowerCase().includes(qq)));
+
+    const filtrado = g || c || s || qq;
+    $('#catalogo-titulo').textContent = qq
+      ? `Resultados para “${qRaw}”`
+      : filtrado ? [NOMBRES[g], s && NOMBRES[s], c].filter(Boolean).join(' / ') : 'Lo nuevo en Elive';
+    $('#ver-todo').classList.toggle('hidden', !filtrado);
+    $('#sin-resultados').classList.toggle('hidden', base.length > 0);
+
+    function pintar() {
+      const o = $('#orden').value;
+      const lista = [...base];
+      if (o === 'menor') lista.sort((a, b) => a.precio - b.precio);
+      if (o === 'mayor') lista.sort((a, b) => b.precio - a.precio);
+      $('#conteo').textContent = `${lista.length} ${lista.length === 1 ? 'prenda' : 'prendas'}` + (o ? `, ordenadas ${ORDEN[o]}` : '');
+      $('#productos').innerHTML = lista.map(card).join('');
+    }
+    $('#orden').addEventListener('change', pintar);
+    pintar();
+  </script>
+</body>
+</html>

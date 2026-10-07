@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedido confirmado | ELIVE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F9F9F6] text-black font-sans antialiased">
+
+  <a href="#contenido" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:border focus:border-black focus:bg-white focus:px-4 focus:py-2">Saltar al contenido</a>
+
+  <header class="border-b border-black/10 bg-[#F9F9F6]">
+    <div class="mx-auto flex max-w-7xl items-center justify-center px-4 py-4 lg:px-8">
+      <a href="index.html" class="text-2xl font-medium uppercase tracking-[0.35em] [font-family:Jost,'Helvetica_Neue',Arial,sans-serif]" aria-label="Elive, ir al inicio">ELIVE</a>
+    </div>
+  </header>
+
+  <main id="contenido" class="mx-auto max-w-3xl px-4 py-8 lg:py-12">
+
+    <nav aria-label="Progreso de la compra" class="mb-8">
+      <ol class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <li>1. Bolsa</li><li aria-hidden="true">›</li>
+        <li>2. Datos y pago</li><li aria-hidden="true">›</li>
+        <li aria-current="step" class="font-semibold underline underline-offset-4">3. Confirmación <span class="sr-only">(paso actual)</span></li>
+      </ol>
+    </nav>
+
+    <section id="ok" class="hidden" aria-labelledby="h1">
+      <div class="flex items-center gap-4">
+        <svg class="h-14 w-14 flex-none" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#15803D"/><path d="m7 12.5 3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h1 id="h1" tabindex="-1" class="text-3xl font-semibold tracking-tight lg:text-4xl">¡Gracias por tu compra!</h1>
+      </div>
+      <p class="mt-4">Tu pedido <strong id="num"></strong> está confirmado. Guardamos <strong id="mail"></strong> para avisarte cómo va tu compra.</p>
+
+      <div class="mt-8 bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+        <h2 class="text-lg font-semibold uppercase tracking-wide">Resumen</h2>
+        <ul id="items" class="mt-4 divide-y divide-black/10"></ul>
+        <dl class="mt-4 space-y-2 border-t border-black/10 pt-4 text-sm">
+          <div class="flex justify-between"><dt>Subtotal</dt><dd id="r-sub"></dd></div>
+          <div class="flex justify-between"><dt>Envío</dt><dd id="r-env"></dd></div>
+          <div class="flex justify-between text-base font-bold"><dt>Total pagado</dt><dd id="r-tot"></dd></div>
+        </dl>
+      </div>
+
+      <h2 class="mt-10 text-lg font-semibold uppercase tracking-wide">Estado de tu pedido</h2>
+      <p class="mt-3 flex items-center gap-2 text-sm"><svg class="h-5 w-5 flex-none" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#15803D"/><path d="m7 12.5 3.2 3.2L17 8.8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span><strong>Pedido recibido y pago confirmado.</strong> Ahora estamos preparando tu pedido.</span></p>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <a href="pedido.html" class="inline-block bg-black px-6 py-3 text-sm font-medium tracking-wide text-white transition-colors hover:bg-black/85">Ver estado de mi pedido</a>
+        <a id="btn-correo" href="#" class="inline-block border border-black bg-white px-6 py-3 text-sm font-medium transition-colors hover:bg-black hover:text-white">Enviar resumen a mi correo</a>
+      </div>
+
+      <a href="index.html#catalogo" class="mt-8 inline-block text-sm underline underline-offset-4">Seguir comprando</a>
+    </section>
+
+    <section id="nada" class="hidden bg-white p-8 text-center shadow-[0_1px_2px_rgba(0,0,0,0.06)]">
+      <h1 class="text-2xl font-semibold">No hay un pedido reciente</h1>
+      <p class="mt-2">Cuando completes una compra, verás aquí su confirmación.</p>
+      <a href="index.html#catalogo" class="mt-6 inline-block border border-black bg-white px-8 py-3 text-sm tracking-wide transition-colors hover:bg-black hover:text-white">Ver catálogo</a>
+    </section>
+  </main>
+
+  <footer></footer>
+
+  <script src="elive.js"></script>
+  <script>
+    const ped = Store.get('pedido', null);
+    if (!ped) {
+      $('#nada').classList.remove('hidden');
+    } else {
+      $('#ok').classList.remove('hidden');
+      document.title = `Pedido ${ped.num} confirmado | ELIVE`;
+      $('#num').textContent = ped.num;
+      $('#mail').textContent = ped.email;
+      const cuerpo = `Hola, tu pedido ${ped.num} de ELIVE está confirmado.\n\nResumen:\n` + ped.items.map(i => `- ${i.nombre}, talla ${i.talla}, cantidad ${i.cant}: ${money(i.sub)}`).join('\n') + `\n\nEnvío: ${ped.envio === 0 ? 'Gratis' : money(ped.envio)}\nTotal pagado: ${money(ped.total)}\n\nEstado actual: Preparando tu pedido. Entrega estimada: 3 a 5 días hábiles.\n\nGracias por comprar en ELIVE.`;
+      $('#btn-correo').href = `mailto:${ped.email}?subject=${encodeURIComponent('Tu pedido ' + ped.num + ' en ELIVE')}&body=${encodeURIComponent(cuerpo)}`;
+      $('#items').innerHTML = ped.items.map(i => `
+        <li class="flex items-center justify-between gap-4 py-3 text-sm">
+          <span>${i.nombre} · Talla ${i.talla} · Cantidad ${i.cant}</span>
+          <span class="font-semibold">${money(i.sub)}</span>
+        </li>`).join('');
+      $('#r-sub').textContent = money(ped.subtotal);
+      $('#r-env').textContent = ped.envio === 0 ? 'Gratis' : money(ped.envio);
+      $('#r-tot').textContent = money(ped.total);
+      $('#h1').focus(); // el lector de pantalla anuncia la confirmación al llegar
+    }
+  </script>
+</body>
+</html>
